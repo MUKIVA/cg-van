@@ -32,7 +32,9 @@ namespace Task1.ViewModel
             byte[] pixels = new byte[image.PixelHeight * image.PixelWidth * 4];
             image.CopyPixels(pixels, image.PixelWidth * 4, 0);
 
-            return BitmapImage
+            
+
+            return BitmapSource
                 .Create(
                 image.PixelHeight,
                 image.PixelHeight,

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Lw2.DialogService;
 using System.Windows.Media.Imaging;
@@ -22,12 +18,6 @@ namespace Lw2.ViewModel
         
         public CanvasVM CanvasContext { get; private set; }
 
-        private double _scaleX = 1;
-        private double _scaleY = 1;
-
-        private const int BASE_WIDTH = 800;
-        private const int BASE_HEIGHT = 600;
-
         private double _dpiX = 96;
         private double _dpiY = 96;
 
@@ -35,26 +25,6 @@ namespace Lw2.ViewModel
         private Func<RenderTargetBitmap> _getRenderTargetBitmap;
 
         private IDialogService _dialogService = new DefaultDiologService();
-
-        public double ScaleX
-        {
-            get => _scaleX;
-            set
-            {
-                _scaleX = value;
-                NotifyPropertyChange(nameof(ScaleX));
-            }
-        }
-
-        public double ScaleY
-        {
-            get => _scaleY;
-            set
-            {
-                _scaleY = value;
-                NotifyPropertyChange(nameof(ScaleY));
-            }
-        }
 
         public MainVM(InkCanvas canvas)
         {
@@ -71,8 +41,8 @@ namespace Lw2.ViewModel
         {
             RenderTargetBitmap bitmap
                         = new RenderTargetBitmap(
-                            (int)(CanvasContext.Width / _scaleX), 
-                            (int)(CanvasContext.Height / _scaleY),
+                            CanvasContext.Width,
+                            CanvasContext.Height,
                             _dpiX, 
                             _dpiY, 
                             PixelFormats.Default);
@@ -128,6 +98,24 @@ namespace Lw2.ViewModel
             }
         }
 
+        private BitmapSource CopyImage(string filePath)
+        {
+            BitmapImage image = new BitmapImage(new Uri(filePath, UriKind.Absolute));
+
+            byte[] pixels = new byte[image.PixelHeight * image.PixelWidth * 4];
+            image.CopyPixels(pixels, image.PixelWidth * 4, 0);
+
+            return BitmapImage
+                .Create(
+                image.PixelHeight,
+                image.PixelHeight,
+                image.DpiX,
+                image.DpiY,
+                image.Format,
+                image.Palette,
+                pixels, image.PixelWidth * 4);
+        }
+
         public void LoadPictureAction(object? sender)
         {
             _clearAction();
@@ -138,23 +126,10 @@ namespace Lw2.ViewModel
                     string filePath = _dialogService.FilePath;
 
                     ImageBrush brush = new ImageBrush();
-                    brush.ImageSource = new BitmapImage(new Uri(filePath, UriKind.Absolute));
+                    brush.ImageSource = CopyImage(filePath);
 
-                    var image = new BitmapImage();
-                    image.BeginInit();
-                    image.UriSource = new Uri(filePath);
-                    image.EndInit();
-
-                    byte[] pixels = new byte[image.PixelHeight * image.PixelWidth * 4];
-
-                    ScaleX = BASE_WIDTH / image.Width;
-                    ScaleY = BASE_HEIGHT / image.Height;
-
-                    _dpiX = image.DpiX;
-                    _dpiY = image.DpiY;
-
-                    CanvasContext.Width = (int)(image.Width * ScaleX);
-                    CanvasContext.Height = (int)(image.Height * ScaleY);
+                    CanvasContext.Width = (int)(brush.ImageSource.Width);
+                    CanvasContext.Height = (int)(brush.ImageSource.Height);
                     CanvasContext.LoadImage = brush;
                     CanvasContext.VisibleMode = Visibility.Visible;
                 }

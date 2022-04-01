@@ -32,7 +32,6 @@ void CSurface::DrawLine(Point const& from, Point const& to, const std::uint32_t 
 	}
 	glLineWidth(lineWidth);
 	glBegin(GL_LINES);
-	//glEnable(GL_SMOOTH);
 
 	double r = (double)((lineColor >> 16) & 0xff) / 255;
 	double g = (double)((lineColor >> 8) & 0xff) / 255;
@@ -42,7 +41,6 @@ void CSurface::DrawLine(Point const& from, Point const& to, const std::uint32_t 
 	glVertex2d((from.x / m_width), (from.y / m_height));
 	glVertex2d((to.x / m_width), (to.y / m_height));
 	glEnd();
-	//glDisable(GL_SMOOTH);
 	return;
 }
 
@@ -85,16 +83,11 @@ void CSurface::DrawCircle(Point const& center, const double radius, std::uint32_
 	double b = (double)((lineColor >> 0) & 0xff) / 255;
 	glColor3d(r, g, b);
 
-	//double prevX = CANVAS_CENTER_X;
-	//double prevY = CANVAS_CENTER_Y - RADIUS_PROJECTION_ONTO_CANVAS_Y;
 	for (int i = 0; i < STEPS; i++)
 	{
 		double newX = RADIUS_PROJECTION_ONTO_CANVAS_X * sin(ANGLE * i) + CANVAS_CENTER_X;
 		double newY = -RADIUS_PROJECTION_ONTO_CANVAS_Y * cos(ANGLE * i) + CANVAS_CENTER_Y;
-		//glVertex2d(prevX, prevY);
 		glVertex2d(newX, newY);
-		//prevX = newX;
-		//prevY = newY;
 	}
 	glEnd();
 }
@@ -148,7 +141,7 @@ CSurface::CSurface(int width, int height, const char* title, std::unordered_map<
 	m_window = glfwCreateWindow(m_width, m_height, title, NULL, NULL);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 	glEnable(GL_SMOOTH);
 
 

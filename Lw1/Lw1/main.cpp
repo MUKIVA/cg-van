@@ -17,10 +17,10 @@ std::vector<CLineSegment> GetFirstNameInitial()
 	std::vector<CLineSegment> lines;
 	auto color = 0x8066dd;
 
-	//lines.push_back(CLineSegment({ -310, -100 }, { -310, 100 }, color, 20));
+	lines.push_back(CLineSegment({ -310, -100 }, { -310, 100 }, color, 20));
 	lines.push_back(CLineSegment({ -310, 100 }, { -250, 0 }, color, 150));
-	//lines.push_back(CLineSegment({ -250, 0 }, { -190, 100 }, color, 150));
-	//lines.push_back(CLineSegment({ -190, 100 }, { -190, -100 }, color, 150));
+	lines.push_back(CLineSegment({ -250, 0 }, { -190, 100 }, color, 150));
+	lines.push_back(CLineSegment({ -190, 100 }, { -190, -100 }, color, 150));
 
 	return lines;
 }
