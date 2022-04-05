@@ -49,10 +49,7 @@ namespace Lw3
         }
         public void DrawLine(Vector2 from, Vector2 to, Color4 color, float width = 5)
         {
-            Vector2 v1 = from * _lineScale;
-            Vector2 v2 = to * _lineScale;
-
-            var _ = new float[] { v1.X, v1.Y, v2.X, v2.Y };
+            var _ = new float[] { from.X, from.Y, to.X, to.Y };
 
             GL.VertexPointer(2, VertexPointerType.Float, 0, _);
             GL.EnableClientState(ArrayCap.VertexArray);
@@ -65,8 +62,6 @@ namespace Lw3
         public void DrawBrokenLine(float[] vertexes, Color4 color, float width = 5)
         {
             GL.PushMatrix();
-            GL.Scale(_lineScale.Row0.X, _lineScale.Row1.Y, 1);
-
             GL.VertexPointer(2, VertexPointerType.Float, 0, vertexes);
             GL.EnableClientState(ArrayCap.VertexArray);
                 GL.Color4(color);
@@ -77,14 +72,13 @@ namespace Lw3
         }
         protected override void OnLoad()
         {
-            _lineScale = Matrix2.CreateScale(1, 1);
+            GL.MatrixMode(MatrixMode.Modelview0Ext);
+            GL.Scale(1f / Size.X, 1f / Size.Y, 1);
             base.OnLoad();
         }
         public void DrawPoint(Vector2 point, Color4 color, float size = 5)
         {
-            Vector2 v = point * _lineScale;
-
-            var _ = new float[] { v.X, v.Y };
+            var _ = new float[] { point.X, point.Y };
             GL.VertexPointer(2, VertexPointerType.Float, 0, _);
             GL.EnableClientState(ArrayCap.VertexArray);
                 GL.PointSize(size);
@@ -95,11 +89,7 @@ namespace Lw3
         }
         public void DrawTriangle(Vector2 p1, Vector2 p2, Vector2 p3, Color4 color)
         {
-            Vector2 v1 = p1 * _lineScale;
-            Vector2 v2 = p2 * _lineScale;
-            Vector2 v3 = p3 * _lineScale;
-
-            var _ = new float[] { v1.X, v1.Y, v2.X, v2.Y, v3.X, v3.Y };
+            var _ = new float[] { p1.X, p1.Y, p2.X, p2.Y, p3.X, p3.Y };
 
             GL.VertexPointer(2, VertexPointerType.Float, 0, _);
             GL.EnableClientState(ArrayCap.VertexArray);
@@ -130,18 +120,21 @@ namespace Lw3
         {
             float radius = 0;
             List<float> vertexes = new List<float>();
+
             while (radius < MathF.PI * 10)
             {
                 Vector4 point = new(radius, 0, 0, 1);
+
                 point *= Matrix4.CreateScale(_graphScale, _graphScale, 1);
                 point *= Matrix4.CreateRotationZ(radius);
 
                 vertexes.Add(point.X);
                 vertexes.Add(point.Y);
 
-                radius += MathF.PI / 66;
+                radius += MathF.PI / 24;
             }
-            DrawBrokenLine(vertexes.ToArray(), Color4.Red, 3);
+
+            DrawBrokenLine(vertexes.ToArray(), Color4.Red, 5);
         }
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
@@ -185,7 +178,6 @@ namespace Lw3
             DrawCoordsLine();
             DrawCoordsPoint();
             DrawSpiral();
-            //_debugCallback(_graphScale.ToString());
         }
         protected override void OnRenderFrame(FrameEventArgs args)
         {
@@ -200,7 +192,9 @@ namespace Lw3
         {
             GL.Viewport(0, 0, e.Width, e.Height);
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            _lineScale = Matrix2.CreateScale( 1f / e.Width, 1f / e.Height);
+            GL.LoadIdentity();
+            GL.Scale(1f / Size.X, 1f / Size.Y, 1);
+
 
             Draw();
 
