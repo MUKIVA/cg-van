@@ -19,7 +19,7 @@ namespace Task2
 
         public void Draw(Window canvas)
         {
-            canvas.DrawBrokenLine(_points, Color, LineWidth);
+            canvas.DrawPolyline(_points, Color, LineWidth);
         }
 
         public Vector2 GetPoint(int index)

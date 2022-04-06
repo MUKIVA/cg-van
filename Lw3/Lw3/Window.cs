@@ -15,8 +15,9 @@ namespace Lw3
         private readonly Action<object?> _debugCallback
             = (object? message) => Console.WriteLine(message);
 
-        private Matrix2 _lineScale;
-        private float _graphScale = 20.0f;
+        private Vector3 _graphScale = new(20f, 20f, 1);
+
+        public static bool CopyCreated = false;
 
         public Window(
             NativeWindowSettings nwCfg,
@@ -29,6 +30,7 @@ namespace Lw3
             GL.ClearColor(Color4.White);
             GL.Enable(EnableCap.PointSprite);
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+            GL.Enable(EnableCap.LineSmooth);
             GL.Enable(EnableCap.Blend);
 
             PrintDeviceInfo();
@@ -47,56 +49,60 @@ namespace Lw3
             printCallback(GL.GetString(StringName.Renderer));
             printCallback(GL.GetString(StringName.ShadingLanguageVersion));
         }
-        public void DrawLine(Vector2 from, Vector2 to, Color4 color, float width = 5)
+        private void DrawLine(Vector2 from, Vector2 to, Color4 color, float width = 5)
         {
-            var _ = new float[] { from.X, from.Y, to.X, to.Y };
+            // Дать названия переменным
+            var vertexBuffer = new float[] { from.X, from.Y, to.X, to.Y };
 
-            GL.VertexPointer(2, VertexPointerType.Float, 0, _);
+            GL.VertexPointer(2, VertexPointerType.Float, 0, vertexBuffer);
             GL.EnableClientState(ArrayCap.VertexArray);
                 GL.LineWidth(width);
                 GL.Color4(color);
                 GL.DrawArrays(PrimitiveType.Lines, 0, 2);
             GL.DisableClientState(ArrayCap.VertexArray);
-            GC.SuppressFinalize(_);
+            GC.SuppressFinalize(vertexBuffer);
         }
-        public void DrawBrokenLine(float[] vertexes, Color4 color, float width = 5)
+        private void DrawPolyline(float[] vertexes, Color4 color, float width = 5)
         {
-            GL.PushMatrix();
+            // Push matrix Pop matrix не нужны
             GL.VertexPointer(2, VertexPointerType.Float, 0, vertexes);
             GL.EnableClientState(ArrayCap.VertexArray);
                 GL.Color4(color);
                 GL.LineWidth(width);
                 GL.DrawArrays(PrimitiveType.LineStrip, 0, vertexes.Length / 2);
             GL.DisableClientState(ArrayCap.VertexArray);
-            GL.PopMatrix();
         }
         protected override void OnLoad()
         {
             GL.MatrixMode(MatrixMode.Modelview0Ext);
-            GL.Scale(1f / Size.X, 1f / Size.Y, 1);
+
+            //if (!CopyCreated)
+            //    CreateCopy(Programm.WindowCfg);
+
+
             base.OnLoad();
         }
-        public void DrawPoint(Vector2 point, Color4 color, float size = 5)
+        private void DrawPoint(Vector2 point, Color4 color, float size = 5)
         {
-            var _ = new float[] { point.X, point.Y };
-            GL.VertexPointer(2, VertexPointerType.Float, 0, _);
+            var vertexBuffer = new float[] { point.X, point.Y };
+            GL.VertexPointer(2, VertexPointerType.Float, 0, vertexBuffer);
             GL.EnableClientState(ArrayCap.VertexArray);
                 GL.PointSize(size);
                 GL.Color4(color);
-                GL.DrawArrays(PrimitiveType.Points, 0, 1);
+                GL.DrawArrays(PrimitiveType.Patches, 0, 1);
             GL.DisableClientState(ArrayCap.VertexArray);
-            GC.SuppressFinalize(_);
+            GC.SuppressFinalize(vertexBuffer);
         }
-        public void DrawTriangle(Vector2 p1, Vector2 p2, Vector2 p3, Color4 color)
+        private void DrawTriangle(Vector2 p1, Vector2 p2, Vector2 p3, Color4 color)
         {
-            var _ = new float[] { p1.X, p1.Y, p2.X, p2.Y, p3.X, p3.Y };
+            var vertexBuffer = new float[] { p1.X, p1.Y, p2.X, p2.Y, p3.X, p3.Y };
 
-            GL.VertexPointer(2, VertexPointerType.Float, 0, _);
+            GL.VertexPointer(2, VertexPointerType.Float, 0, vertexBuffer);
             GL.EnableClientState(ArrayCap.VertexArray);
                 GL.Color4(color);
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
             GL.DisableClientState(ArrayCap.VertexArray);
-            GC.SuppressFinalize(_);
+            GC.SuppressFinalize(vertexBuffer);
         }
         private void DrawCoordsLine()
         {
@@ -121,63 +127,76 @@ namespace Lw3
             float radius = 0;
             List<float> vertexes = new List<float>();
 
+            GL.PushMatrix();
+            GL.Scale(_graphScale);
+
             while (radius < MathF.PI * 10)
             {
-                Vector4 point = new(radius, 0, 0, 1);
-
-                point *= Matrix4.CreateScale(_graphScale, _graphScale, 1);
-                point *= Matrix4.CreateRotationZ(radius);
+                Vector4 point = new(
+                    MathF.Cos(radius) * radius,
+                    MathF.Sin(radius) * radius, 0, 1);
 
                 vertexes.Add(point.X);
                 vertexes.Add(point.Y);
 
                 radius += MathF.PI / 24;
             }
-
-            DrawBrokenLine(vertexes.ToArray(), Color4.Red, 5);
+            
+            DrawPolyline(vertexes.ToArray(), Color4.Red, 5);
+            GL.PopMatrix();
         }
         protected override void OnMouseWheel(MouseWheelEventArgs e)
-        {
-            //if (_graphScale > 1f || e.OffsetY > 0)   
-                _graphScale += e.OffsetY;
-
+        {   
+            _graphScale.Y += e.OffsetY;
+            _graphScale.X += e.OffsetY;
             base.OnMouseWheel(e);
         }
         private float GetOffset()
         {
-            return MathF.PI / (6 * ((int)_graphScale / 100));
+            return MathF.PI / (6 * ((int)_graphScale.X / 100));
         }
         private void DrawCoordsPoint(float height = 10f)
         {
             var offset = GetOffset();
-            for (float x = 0; x * _graphScale < Size.X - 50; x += offset)
+
+            GL.PushMatrix();
+            GL.Scale(new(_graphScale.X, 1, 1));
+
+            for (float x = 0; x * _graphScale.X < Size.X - 50; x += offset)
             {
                 if (x == float.PositiveInfinity)
                     break;
                 DrawLine(
-                    new Vector2(x, height) * Matrix2.CreateScale(_graphScale, 1), 
-                    new Vector2(x, -height) * Matrix2.CreateScale(_graphScale, 1), Color4.Black, 2 / _graphScale);
+                    new Vector2(x, height), 
+                    new Vector2(x, -height), Color4.Black, 5);
                 DrawLine(
-                    new Vector2(-x, height) * Matrix2.CreateScale(_graphScale, 1), 
-                    new Vector2(-x, -height) * Matrix2.CreateScale(_graphScale, 1), Color4.Black, 2 / _graphScale);
+                    new Vector2(-x, height), 
+                    new Vector2(-x, -height), Color4.Black, 5);
             }
-            for (float y = 0; y * _graphScale < Size.Y - 50; y += offset)
+            GL.PopMatrix();
+            GL.PushMatrix();
+            GL.Scale(new(1, _graphScale.Y, 1));
+            for (float y = 0; y * _graphScale.Y < Size.Y - 50; y += offset)
             {
                 if (y == float.PositiveInfinity)
                     break;
                 DrawLine(
-                    new Vector2(height, y) * Matrix2.CreateScale(1, _graphScale), 
-                    new Vector2(-height, y) * Matrix2.CreateScale(1, _graphScale), Color4.Black, 2 / _graphScale);
+                    new Vector2(height, y), 
+                    new Vector2(-height, y), Color4.Black, 5);
                 DrawLine(
-                    new Vector2(height, -y) * Matrix2.CreateScale(1, _graphScale), 
-                    new Vector2(-height, -y) * Matrix2.CreateScale(1, _graphScale), Color4.Black, 2 / _graphScale);
+                    new Vector2(height, -y), 
+                    new Vector2(-height, -y), Color4.Black, 5);
             }
+            GL.PopMatrix();
         }
         private void Draw()
         {
             DrawCoordsLine();
             DrawCoordsPoint();
-            DrawSpiral();
+            GL.PushMatrix();
+            GL.Scale(_graphScale);
+            Spiral.Draw();
+            GL.PopMatrix();
         }
         protected override void OnRenderFrame(FrameEventArgs args)
         {
@@ -193,13 +212,22 @@ namespace Lw3
             GL.Viewport(0, 0, e.Width, e.Height);
             GL.Clear(ClearBufferMask.ColorBufferBit);
             GL.LoadIdentity();
-            GL.Scale(1f / Size.X, 1f / Size.Y, 1);
 
+            GL.Ortho(-e.Width, e.Width, -e.Height, e.Height, -1, 1);
 
             Draw();
 
             SwapBuffers();
             base.OnResize(e);
+        }
+
+        
+        private void CreateCopy(NativeWindowSettings cfg)
+        {
+            CopyCreated = true;
+            cfg.Title = cfg.Title + " - Copy";
+            Window window = new Window(cfg);
+            window.Run();
         }
     }
 }

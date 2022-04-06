@@ -68,7 +68,7 @@ namespace Task2
             GL.DisableClientState(ArrayCap.VertexArray);
             GC.SuppressFinalize(_);
         }
-        public void DrawBrokenLine(List<Vector2> vertexes, Color4 color, float width = 5)
+        public void DrawPolyline(List<Vector2> vertexes, Color4 color, float width = 5)
         {
             float[] pointBuffer = VertexToPointBuffer(vertexes); 
 
@@ -109,6 +109,7 @@ namespace Task2
             List<float> vertexBuffer = new();
             while (MathF.Round(t, 2) <= 1.00f)
             {
+                // Избавиться от создания излшика массивов
                 List<Vector2> _1 = points.ToList();
                 List<Vector2> _2 = new();
                 while (_1.Count != 1)

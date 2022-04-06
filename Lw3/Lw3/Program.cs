@@ -27,6 +27,7 @@ namespace Lw3
         static void Main()
         {
             Window window = new(WindowCfg);
+            //window.CreateCopy(WindowCfg);
             window.Run();
         }
     }
