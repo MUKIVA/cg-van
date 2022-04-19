@@ -16,14 +16,14 @@ namespace Lw4
 
         private bool _leftMouseBtnPressed = false;
 
-        private static float _ = 0;
-
         private Matrix4 _cameraMatrix = Matrix4.LookAt(
-            new(0, 0, 2),
+            new(0, 0, 6),
             new(0, 0, 0),
             new(0, 2, 0));
 
         private Cube _shape = new Cube();
+
+        private DeltoidalHexecontahedron _dod = new();
 
         public Game(NativeWindowSettings cfg)
             : base(GameWindowSettings.Default, cfg)
@@ -66,17 +66,17 @@ namespace Lw4
         protected override void OnLoad()
         {
             GL.Enable(EnableCap.Lighting);
-            GL.Enable(EnableCap.Light1);
+            GL.Enable(EnableCap.Light2);
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Back);
             GL.FrontFace(FrontFaceDirection.Ccw);
             GL.Enable(EnableCap.DepthTest);
 
-            DirectLight light = new(new(0, 0, 1));
+            DirectLight light = new(new(0, 0, 0));
             light.SetDiffuseIntensity(new(0.5f, 0.5f, 0.5f, 1f));
             light.SetAmbientIntensity(new(0.3f, 0.3f, 0.3f, 1.0f));
             light.SetSpecularIntensity(new(1.0f, 1.0f, 1.0f, 1.0f));
-            light.Apply(LightName.Light1);
+            light.Apply(LightName.Light2);
             
         }
 
@@ -128,6 +128,7 @@ namespace Lw4
             _cameraMatrix = _cameraMatrix.Rotate(xAngle, xAxis);
             _cameraMatrix = _cameraMatrix.Rotate(yAngle, yAxis);
 
+
             _cameraMatrix = Orthonormalize(_cameraMatrix);
         }
 
@@ -138,7 +139,7 @@ namespace Lw4
 
             SetupCameraMatrix();
 
-            _shape.Draw();
+            _dod.Draw();
         }
 
         private void SetupCameraMatrix()

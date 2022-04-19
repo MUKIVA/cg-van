@@ -72,6 +72,7 @@ namespace Lw4
 
 			List<float> colorPointer = new();
 			List<float> vertexPointer = new();
+			List<float> normalArray = new();
 
 			for (int face = 0; face < faceCount; ++face)
 			{
@@ -91,7 +92,10 @@ namespace Lw4
 				var v02 = p2 - p0;
 				var normal = Vector3.Normalize(Vector3.Cross(v01, v02));
 
-				GL.Normal3(normal);
+				normalArray.Add(normal.X); normalArray.Add(normal.Y); normalArray.Add(normal.Y);
+				normalArray.Add(normal.X); normalArray.Add(normal.Y); normalArray.Add(normal.Y);
+				normalArray.Add(normal.X); normalArray.Add(normal.Y); normalArray.Add(normal.Y);
+				normalArray.Add(normal.X); normalArray.Add(normal.Y); normalArray.Add(normal.Y);
 
 				vertexPointer.Add(p0.X); vertexPointer.Add(p0.Y); vertexPointer.Add(p0.Z);
 				AddColor(colorPointer, _sideColors[face]);
@@ -107,11 +111,14 @@ namespace Lw4
 			GL.VertexPointer(3, VertexPointerType.Float, 0, vertexPointer.ToArray());
             GL.EnableClientState(ArrayCap.ColorArray);
 			GL.ColorPointer(4, ColorPointerType.Float, 0, colorPointer.ToArray());
+			GL.EnableClientState(ArrayCap.NormalArray);
+			GL.NormalPointer(NormalPointerType.Float, 0, normalArray.ToArray());
 			{
 				GL.DrawArrays(PrimitiveType.Quads, 0, vertexPointer.Count / 3);
 			}
             GL.DisableClientState(ArrayCap.ColorArray);
 			GL.DisableClientState(ArrayCap.VertexArray);
+			GL.DisableClientState(ArrayCap.NormalArray);
 		}
 
 		public void SetSideColor(CubeSide side, Vector4 color)
