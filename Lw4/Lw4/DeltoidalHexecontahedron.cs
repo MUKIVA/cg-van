@@ -13,7 +13,7 @@ namespace Lw4
         private static readonly float _fi = (1f + MathF.Sqrt(5))/ 2f;
         private Random _rnd = new(0);
 
-        private float _size = 2.5f;
+        private float _size = 1.5f;
 
         private float[] _vertexBuffer;
         private float[] _colorBuffer;
