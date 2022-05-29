@@ -12,11 +12,10 @@ namespace Lw5
         public const int mazeHeight = 15;
         public const int mazeWidth = 23;
 
-        private Texture[] _ambient = new Texture[6];
+        private Texture[] _diffuse = new Texture[6];
         private Texture[] _specular = new Texture[6];
+        private Texture[] _normal = new Texture[6];
 
-        //private Texture _tex;
-        //private Texture _spec
         private Random _rnd = new(DateTime.Now.Millisecond);
         private Player _player;
         
@@ -37,27 +36,31 @@ namespace Lw5
                 Vector3.UnitY +
                 Vector3.UnitZ * (zOffset), Size.X / (float)Size.Y);
 
-            //_tex = new(Common.TexDir + @"\container2.png");
-            //_spec = new(Common.TexDir + @"\container2_specular.png");
-            _ambient[0] = new(Common.TexDir + @"\container2.png");
+            _diffuse[0] = new(Common.TexDir + @"\container2.png");
             _specular[0] = new(Common.TexDir + @"\container2_specular.png");
-            _ambient[1] = new(Common.TexDir + @"\brick-1.png");
+            _normal[0] = new(Common.TexDir + @"\container2_normal.png");
+            _diffuse[1] = new(Common.TexDir + @"\brick-1.png");
             _specular[1] = new(Common.TexDir + @"\brick-1_specular.png");
-            _ambient[2] = new(Common.TexDir + @"\brick-2.png");
+            _normal[1] = new(Common.TexDir + @"\brick-1_normal.png");
+            _diffuse[2] = new(Common.TexDir + @"\brick-2.png");
             _specular[2] = new(Common.TexDir + @"\brick-2_specular.png");
-            _ambient[3] = new(Common.TexDir + @"\brick-3.jpg");
+            _normal[2] = new(Common.TexDir + @"\brick-2_normal.png");
+            _diffuse[3] = new(Common.TexDir + @"\brick-3.jpg");
             _specular[3] = new(Common.TexDir + @"\brick-3_specular.png");
-            _ambient[4] = new(Common.TexDir + @"\bricks-4.png");
+            _normal[3] = new(Common.TexDir + @"\brick-3_normal.png");
+            _diffuse[4] = new(Common.TexDir + @"\bricks-4.png");
             _specular[4] = new(Common.TexDir + @"\bricks-4_specular.png");
-            _ambient[5] = new(Common.TexDir + @"\patch-1.png");
+            _normal[4] = new(Common.TexDir + @"\bricks-4_normal.png");
+            _diffuse[5] = new(Common.TexDir + @"\patch-1.png");
             _specular[5] = new(Common.TexDir + @"\patch-1_specular.png");
+            _normal[5] = new(Common.TexDir + @"\patch-1_normal.png");
 
 
-            _ground = new(_player.light, _ambient[0], _specular[0], mazeHeight, mazeWidth);
+            _ground = new(_player.light, _diffuse[0], _specular[0], mazeHeight, mazeWidth);
              
             _ground.Transform.Scale = new(mazeWidth, 0, mazeHeight);
 
-            _ground1 = new(_player.light, _ambient[0], _specular[0], mazeHeight, mazeWidth);
+            _ground1 = new(_player.light, _diffuse[0], _specular[0], mazeHeight, mazeWidth);
 
             _ground1.Transform.Scale = new(mazeWidth, 0, mazeHeight);
             _ground1.Transform.Position = Vector3.UnitY * 2f;
@@ -69,7 +72,7 @@ namespace Lw5
                 for (int j = 0; j <= mazeHeight; j++)
                 {
                     var index = _rnd.Next(1, 6);
-                    var cell = new Cell(_player.light, _ambient[index], _specular[index]);
+                    var cell = new Cell(_player.light, _diffuse[index], _specular[index], _normal[index]);
                     cell.Index = new(i, j);
                     cell.SetPos(i - xOffset, -j + zOffset);
                     _cells[i, j] = cell;
@@ -141,10 +144,6 @@ namespace Lw5
         protected override void OnLoad()
         {
             base.OnLoad();
-
-            //GL.Enable(EnableCap.CullFace);
-            //GL.CullFace(CullFaceMode.Back);
-            //GL.FrontFace(FrontFaceDirection.Ccw);
 
             GL.Enable(EnableCap.DepthTest);
             GL.ClearColor(Color4.Indigo);

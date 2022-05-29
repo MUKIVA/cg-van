@@ -8,31 +8,38 @@ namespace Lw5
         private float _shininess = 32.0f;
         public Light _light;
 
-        private Texture? _ambientMap;
+        private Texture? _diffuseMap;
         private Texture? _specularMap;
+        private Texture? _normalMap;
 
         public bool CollisionEnable { get; set; } = true;
 
-        public LitCube(Light light, Texture? ambientMap = null, Texture? specularMap = null)
+        public LitCube(Light light, Texture? diffuseMap = null, Texture? specularMap = null, Texture? normalMap = null)
             : base(new Shader($@"{Common.ShaderDir}\shader.vert", $@"{Common.ShaderDir}\lit.frag"))
         {
             _light = light;
-            _ambientMap = ambientMap;
+            _diffuseMap = diffuseMap;
             _specularMap = specularMap;
+            _normalMap = normalMap;
             if (_specularMap != null)
                 _specularMap.TexBlock = TextureUnit.Texture1;
+            if (_normalMap != null)
+                _normalMap.TexBlock = TextureUnit.Texture2;
         }
 
         public override void Draw(Camera camera)
         {
 
             _material.Use();
-            if (_ambientMap != null)
-                _ambientMap.Use();
+            if (_diffuseMap != null)
+                _diffuseMap.Use();
             if (_specularMap != null)
                 _specularMap.Use();
+            if (_normalMap != null)
+                _normalMap.Use();
             _material.SetInt("material.diffuse", 0);
             _material.SetInt("material.specular", 1);
+            _material.SetInt("material.normal", 2);
             _material.SetFloat("material.shininess", _shininess);
 
             _material.SetVector3("light.position", _light.Position);
@@ -70,12 +77,6 @@ namespace Lw5
 
             Vector3 result = Vector3.Zero;
 
-
-            //if (LerpIntersection(topLeft, new(bottomRight.X, 0, topLeft.Z)))
-            //if (LerpIntersection(bottomRight, new(bottomRight.X, 0, topLeft.Z)))
-            //if (LerpIntersection(topLeft, new(bottomRight.X, 0, topLeft.Z)))
-            //if (LerpIntersection(bottomRight, new(bottomRight.X, 0, topLeft.Z)))
-
             if ((IntersectPointZoX(topLeft) && IntersectPointZoX(new(bottomRight.X, 0, topLeft.Z))) || IntersectPointZoY(topLeft))
                 result += Vector3.UnitZ;
             if ((IntersectPointZoX(bottomRight) && IntersectPointZoX(new(topLeft.X, 0, bottomRight.Z))) || IntersectPointZoY(bottomRight))
@@ -96,14 +97,12 @@ namespace Lw5
 
         public bool IntersectPointZoY(Vector3 point)
         {
-            //FrontRightTopPoint; BackRightBottomPoint
             return !(point.Y > FrontRightTopPoint.Y || point.Y < BackRightBottomPoint.Y ||
                 point.Z > FrontRightTopPoint.Z || point.Z < BackRightBottomPoint.Z);
         }
 
         public bool IntersectPointYoX(Vector3 point)
         {
-            //FrontLeftTopPoint; FrontRightBottomPoint
             return !(point.Y > FrontLeftTopPoint.Y || point.Y < FrontRightBottomPoint.Y ||
                 point.X > FrontRightBottomPoint.X || point.X < FrontLeftTopPoint.X);
         }

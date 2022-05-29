@@ -39,7 +39,7 @@ namespace Lw5
                 }
 
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                Width, Height, 0, PixelFormat.Rgba, PixelType.Byte, pixels.ToArray());
+                Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pixels.ToArray());
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
             GL.BindTexture(TextureTarget.Texture2D, 0);

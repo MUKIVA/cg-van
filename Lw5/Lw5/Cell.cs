@@ -12,14 +12,14 @@ namespace Lw5
 
         public Vector2i Index { get; set; } = Vector2i.Zero;
 
-        public Cell(Light light, Texture ambient, Texture specular)
+        public Cell(Light light, Texture ambient, Texture specular, Texture normal)
         {
-            _leftWall = new(light, ambient, specular);
+            _leftWall = new(light, ambient, specular, normal);
 
             _leftWall.Transform.Scale = new(0.1f, 2, 1);
             _leftWall.Transform.Position = new(-0.5f, 1, 0);
 
-            _bottomWall = new(light, ambient, specular);
+            _bottomWall = new(light, ambient, specular, normal);
 
             _bottomWall.Transform.Scale = new(1f, 2, 0.1f);
             _bottomWall.Transform.Position = new(0, 1, 0.5f);
