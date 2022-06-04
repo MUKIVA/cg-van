@@ -46,7 +46,7 @@ namespace Lw7.Model
         /// Возвращает true, если поток был запущен и false, если поток запущен не был,
         /// т.к. не завершилась текущая операция по построению изображения в буфере кадра
         /// </summary>
-        public bool Render(FrameBuffer frameBuffer)
+        public bool Render(Scene scene, RenderContext context, FrameBuffer frameBuffer)
         {
             if (!SetRendering(true))
             {
@@ -66,7 +66,9 @@ namespace Lw7.Model
                     return false;
                 }
 
-                _thread = new(() => { RenderFrame(frameBuffer); });
+                _thread = new(() => { 
+                    RenderFrame(scene, context, frameBuffer); 
+                });
                 _thread.Start();
 
                 return true; 
@@ -89,7 +91,7 @@ namespace Lw7.Model
         }
 
         // Визуализация кадра, выполняемая в фоновом потоке
-        private void RenderFrame(FrameBuffer frameBuffer)
+        private void RenderFrame(Scene scene, RenderContext context, FrameBuffer frameBuffer)
         {
             uint width = frameBuffer.Width;
             uint height = frameBuffer.Height;
@@ -104,7 +106,7 @@ namespace Lw7.Model
                 {
                     for (uint x = 0; x < width; ++x)
                     {
-                        rowPixels[x] = CalculatePixelColor(x, y, width, height);
+                        rowPixels[x] = context.CalculatePixelColor(scene, (int)x, (int)y);
                     }
 
                     ++_renderedChunks;
@@ -141,38 +143,38 @@ namespace Lw7.Model
         }
 
         // Вычисляет цвет пикселя буфера кадра в координатах (х, у)
-        private UInt32 CalculatePixelColor(UInt32 x, UInt32 y, UInt32 frameWidth, UInt32 frameHeight)
-        {
-            double x0 = 2.0 * x / frameWidth - 1.5;
-            double y0 = 2.0 * y / frameHeight - 1.0;
+        //private UInt32 CalculatePixelColor(UInt32 x, UInt32 y, UInt32 frameWidth, UInt32 frameHeight)
+        //{
+        //    double x0 = 2.0 * x / frameWidth - 1.5;
+        //    double y0 = 2.0 * y / frameHeight - 1.0;
 
-            double rho = Math.Sqrt((x0 - 0.25) * (x0 - 0.25) + y0 * y0);
-            double theta = Math.Atan2(y0, x0 - 0.25);
-            double rhoC = 0.5 - 0.5 * Math.Cos(theta);
-            if (rho <= rhoC)
-            {
-                return 0x000000;
-            }
+        //    double rho = Math.Sqrt((x0 - 0.25) * (x0 - 0.25) + y0 * y0);
+        //    double theta = Math.Atan2(y0, x0 - 0.25);
+        //    double rhoC = 0.5 - 0.5 * Math.Cos(theta);
+        //    if (rho <= rhoC)
+        //    {
+        //        return 0x000000;
+        //    }
 
-            double re = 0, im = 0;
+        //    double re = 0, im = 0;
 
-            int iterCount = 10000;
+        //    int iterCount = 10000;
 
-            while ((iterCount > 0) && re * re + im * im < 1e18)
-            {
-                double re1 = re * re - im * im + x0;
-                im = 2 * re * im + y0;
-                re = re1;
-                --iterCount;
-            }
+        //    while ((iterCount > 0) && re * re + im * im < 1e18)
+        //    {
+        //        double re1 = re * re - im * im + x0;
+        //        im = 2 * re * im + y0;
+        //        re = re1;
+        //        --iterCount;
+        //    }
 
-            UInt32 r = (UInt32)(iterCount / 3) & 0xff;
-            UInt32 g = (UInt32)(iterCount) & 0xff;
-            UInt32 b = (UInt32)(iterCount / 2) & 0xff;
-            UInt32 a = 0xff;
+        //    UInt32 r = (UInt32)(iterCount / 3) & 0xff;
+        //    UInt32 g = (UInt32)(iterCount) & 0xff;
+        //    UInt32 b = (UInt32)(iterCount / 2) & 0xff;
+        //    UInt32 a = 0xff;
 
-            return (a << 24) | (r << 16) | (g << 8) | b;
-        }
+        //    return (a << 24) | (r << 16) | (g << 8) | b;
+        //}
 
         public void Dispose()
         {

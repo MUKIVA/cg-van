@@ -1,6 +1,7 @@
 ﻿using Lw7.Core;
 using System.Windows.Input;
 using Lw7.Model;
+using Lw7.Mathematics;
 
 namespace Lw7.ViewModel
 {
@@ -12,6 +13,8 @@ namespace Lw7.ViewModel
 
         public MainViewModel()
         {
+            //var a = Mat4d.Identity;
+
             _rendererModel = new Renderer();
             _frameBufferModel = new FrameBuffer(800, 600);
 

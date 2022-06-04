@@ -35,6 +35,7 @@ namespace Lw6
         public Game(NativeWindowSettings cfg)
             : base(GameWindowSettings.Default, cfg)
         {
+            var _ = Matrix4.CreateRotationY(3);
             _shader = new(@"C:\DEV\CG\cg-van\Lw6\Lw6\Shaders\shader.vert", @"C:\DEV\CG\cg-van\Lw6\Lw6\Shaders\shader.frag");
             _color = Texture.LoadFromFile(@"C:\DEV\CG\cg-van\Lw6\Lw6\Textures\color.png");
         }

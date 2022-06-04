@@ -92,6 +92,11 @@ namespace Lw7.Mathematics
         public static Vec2d One => new Vec2d(1, 1);
         public static Vec2d UnitX => new Vec2d(1, 0);
         public static Vec2d UnitY => new Vec2d(0, 1);
+
+        public static double Dot(Vec2d left, Vec2d right)
+        {
+            return left.X * right.X + left.Y * right.Y;
+        }
     }
     public struct Vec3d
     {
@@ -158,6 +163,29 @@ namespace Lw7.Mathematics
         {
             return new Vec3d(left.X + Right.X, left.Y + Right.Y, left.Z + Right.Z);
         }
+        public static Vec3d operator *(Mat3d l, Vec3d r)
+        {
+            return new Vec3d(
+                l.M11 * r.X + l.M12 * r.Y + l.M13 * r.Z,
+                l.M21 * r.X + l.M22 * r.Y + l.M23 * r.Z,
+                l.M31 * r.X + l.M32 * r.Y + l.M33 * r.Z);
+        }
+        public static Vec3d operator *(Vec3d l, Mat3d r)
+        {
+            return new Vec3d(
+                l.X * r.M11 + l.Y * r.M21 + l.Z * r.M31,
+                l.X * r.M12 + l.Y * r.M22 + l.Z * r.M32,
+                l.X * r.M13 + l.Y * r.M23 + l.Z * r.M33);
+        }
+        public static bool operator ==(Vec3d l, Vec3d r)
+        {
+            return (l.X == r.X && l.Y == r.Y && l.Z == r.Z);
+        }
+
+        public static bool operator !=(Vec3d l, Vec3d r)
+        {
+            return !(l.X == r.X && l.Y == r.Y && l.Z == r.Z);
+        }
 
         public double Length
         {
@@ -171,12 +199,40 @@ namespace Lw7.Mathematics
             Y *= invLength;
             Z *= invLength;
         }
+        public Vec3d Normalized()
+        {
+            Vec3d tmp = this;  
+            double invLength = 1 / Length;
+            tmp.X *= invLength;
+            tmp.Y *= invLength;
+            tmp.Z *= invLength;
+            return tmp;
+        }
 
         public static Vec3d Zero => new Vec3d(0, 0, 0);
         public static Vec3d One => new Vec3d(1, 1, 1);
         public static Vec3d UnitX => new Vec3d(1, 0, 0);
         public static Vec3d UnitY => new Vec3d(0, 1, 0);
         public static Vec3d UnitZ => new Vec3d(0, 0, 1);
+
+        public static Vec3d Cross(Vec3d left, Vec3d right)
+        {
+            return new Vec3d(
+                left.Y * right.Z - left.Z * right.Y,
+                left.Z * right.X - left.X * right.Z,
+                left.X * right.Y - left.Y * right.X);
+        }
+
+        public static double Dot(Vec3d left, Vec3d right)
+        {
+            return left.X * right.X + left.Y * right.Y + left.Z * right.Z;
+        }
+
+        public static Vec3d Reflect(Vec3d inDirection, Vec3d inNormal)
+        {
+            double num = -2f * Vec3d.Dot(inNormal, inDirection);
+            return new Vec3d(num * inNormal.X + inDirection.X, num * inNormal.Y + inDirection.Y, num * inNormal.Z + inDirection.Z);
+        }
     }
     public struct Vec4d
     {
@@ -187,6 +243,14 @@ namespace Lw7.Mathematics
             _vector[0] = x;
             _vector[1] = y;
             _vector[2] = z;
+            _vector[3] = w;
+        }
+
+        public Vec4d(Vec3d v, double w)
+        {
+            _vector[0] = v.X;
+            _vector[1] = v.Y;
+            _vector[2] = v.Z;
             _vector[3] = w;
         }
 
@@ -210,9 +274,11 @@ namespace Lw7.Mathematics
 
         public double W
         {
-            get => _vector[2];
-            set => _vector[2] = value;
+            get => _vector[3];
+            set => _vector[3] = value;
         }
+
+        public Vec3d XYZ => new Vec3d(X, Y, Z);
 
         public static Vec4d operator /(Vec4d left, double scalar)
         {
@@ -250,6 +316,22 @@ namespace Lw7.Mathematics
         {
             return new Vec4d(left.X + Right.X, left.Y + Right.Y, left.Z + Right.Z, left.W + Right.W);
         }
+        public static Vec4d operator *(Mat4d l, Vec4d r)
+        {
+            return new Vec4d(
+                l.M11 * r.X + l.M12 * r.Y + l.M13 * r.Z + l.M14 * r.W,
+                l.M21 * r.X + l.M22 * r.Y + l.M23 * r.Z + l.M24 * r.W, 
+                l.M31 * r.X + l.M32 * r.Y + l.M33 * r.Z + l.M34 * r.W,
+                l.M41 * r.X + l.M42 * r.Y + l.M43 * r.Z + l.M44 * r.W);
+        }
+        public static Vec4d operator *(Vec4d l, Mat4d r)
+        {
+            return new Vec4d(
+                l.X * r.M11 + l.Y * r.M21 + l.Z * r.M31 + l.W * r.M41,
+                l.X * r.M12 + l.Y * r.M22 + l.Z * r.M32 + l.W * r.M42,
+                l.X * r.M13 + l.Y * r.M23 + l.Z * r.M33 + l.W * r.M43,
+                l.X * r.M14 + l.Y * r.M24 + l.Z * r.M34 + l.W * r.M44);
+        }
 
         public double Length
         {
@@ -271,6 +353,18 @@ namespace Lw7.Mathematics
         public static Vec4d UnitY => new Vec4d(0, 1, 0, 0);
         public static Vec4d UnitZ => new Vec4d(0, 0, 1, 0);
         public static Vec4d UnitW => new Vec4d(0, 0, 0, 1);
+
+        public static double Dot(Vec4d left, Vec4d right)
+        {
+            return left.X * right.X + left.Y * right.Y + left.Z * right.Z + left.W * right.W;
+        }
+
+
+        public Vec3d Project()
+        {
+            double invW = 1 / W;
+            return new(X * invW, Y * invW, Z * invW);
+        }
     }
     public struct Vec2f
     {
@@ -347,6 +441,11 @@ namespace Lw7.Mathematics
         public static Vec2f One => new Vec2f(1, 1);
         public static Vec2f UnitX => new Vec2f(1, 0);
         public static Vec2f UnitY => new Vec2f(0, 1);
+
+        public static float Dot(Vec2f left, Vec2f right)
+        {
+            return left.X * right.X + left.Y * right.Y;
+        }
     }
     public struct Vec3f
     {
@@ -432,6 +531,18 @@ namespace Lw7.Mathematics
         public static Vec3f UnitX => new Vec3f(1, 0, 0);
         public static Vec3f UnitY => new Vec3f(0, 1, 0);
         public static Vec3f UnitZ => new Vec3f(0, 0, 1);
+
+        public static Vec3f Cross(Vec3f left, Vec3f right)
+        {
+            return new Vec3f(
+                left.Y * right.Z - left.Z * right.Y,
+                left.Z * right.X - left.X * right.Z,
+                left.X * right.Y - left.Y * right.X);
+        }
+        public static float Dot(Vec3f left, Vec3f right)
+        {
+            return left.X * right.X + left.Y * right.Y + left.Z * right.Z;
+        }
     }
     public struct Vec4f
     {
@@ -469,6 +580,8 @@ namespace Lw7.Mathematics
             set => _vector[2] = value;
         }
 
+        public Vec3f XYZ => new Vec3f(X, Y, Z);
+
         public static Vec4f operator /(Vec4f left, float scalar)
         {
             return new Vec4f(left.X / scalar, left.Y / scalar, left.Z / scalar, left.W / scalar);
@@ -505,6 +618,22 @@ namespace Lw7.Mathematics
         {
             return new Vec4f(left.X + Right.X, left.Y + Right.Y, left.Z + Right.Z, left.W + Right.W);
         }
+        public static Vec4f operator *(Mat4f l, Vec4f r)
+        {
+            return new Vec4f(
+                l.M11 * r.X + l.M12 * r.Y + l.M13 * r.Z + l.M14 * r.W,
+                l.M21 * r.X + l.M22 * r.Y + l.M23 * r.Z + l.M24 * r.W,
+                l.M31 * r.X + l.M32 * r.Y + l.M33 * r.Z + l.M34 * r.W,
+                l.M41 * r.X + l.M42 * r.Y + l.M43 * r.Z + l.M44 * r.W);
+        }
+        public static Vec4f operator *(Vec4f l, Mat4f r)
+        {
+            return new Vec4f(
+                l.X * r.M11 + l.Y * r.M21 + l.Z * r.M31 + l.W * r.M41,
+                l.X * r.M12 + l.Y * r.M22 + l.Z * r.M32 + l.W * r.M42,
+                l.X * r.M13 + l.Y * r.M23 + l.Z * r.M33 + l.W * r.M43,
+                l.X * r.M14 + l.Y * r.M24 + l.Z * r.M34 + l.W * r.M44);
+        }
 
         public float Length
         {
@@ -525,5 +654,16 @@ namespace Lw7.Mathematics
         public static Vec4f UnitY => new Vec4f(0, 1, 0, 0);
         public static Vec4f UnitZ => new Vec4f(0, 0, 1, 0);
         public static Vec4f UnitW => new Vec4f(0, 0, 0, 1);
+
+        public static float Dot(Vec4f left, Vec4f right)
+        {
+            return left.X * right.X + left.Y * right.Y + left.Z * right.Z + left.W * right.W;
+        }
+
+        public Vec3f Project()
+        {
+            float invW = 1 / W;
+            return new(X * invW, Y * invW, Z * invW);
+        }
     }
 }
